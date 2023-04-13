@@ -12,61 +12,40 @@ pool:
 steps:
 - script: echo Hello, world!
   displayName: 'Starting Pipeline'
-- task: oc-cmd@2
+- task: oc-cmd@3
   inputs:
     connectionType: 'OpenShift Connection Service'
-    openshiftService: 'Pytest-Dev'
+    openshiftService: 'Openshift Connection'
     cmd: 'status'
     uselocalOc: true
   displayName: 'Check OpenShift Connection'
-- task: oc-cmd@2
+- task: oc-cmd@3
   inputs:
     connectionType: 'OpenShift Connection Service'
-    openshiftService: 'Pytest-Dev'
+    openshiftService: 'Openshift Connection'
     cmd: 'start-build pytest-calculator --from-dir=/home/vsts/work/1/s --wait --follow'
     uselocalOc: true
   displayName: 'Start the Build'
-- task: oc-cmd@2
+- task: oc-cmd@3
   inputs:
     connectionType: 'OpenShift Connection Service'
-    openshiftService: 'Pytest-Dev'
+    openshiftService: 'Openshift Connection'
     cmd: 'rollout latest dc/pytest-calculator'
     uselocalOc: true
   displayName: 'Rollout latest build'
-- task: oc-cmd@2
+- task: oc-cmd@3
   inputs:
     connectionType: 'OpenShift Connection Service'
-    openshiftService: 'Pytest-Dev'
+    openshiftService: 'Openshift Connection'
     cmd: 'rollout status dc pytest-calculator'
     uselocalOc: true
   displayName: 'Check rollout status'
-- task: oc-setup@2
+- task: oc-setup@3
   inputs:
-    openshiftService: 'Pytest-Dev'
+    openshiftService: 'Openshift Connection'
     version: '4.3'
   displayName: 'Find Pod Name'
 - script: |
     sleep 80
     echo "Waiting for pod redeployment"
     echo "##vso[task.setvariable variable=POD_NAME]`oc get pods -l app=pytest-calculator -o jsonpath='{range .items[0].metadata}{.name}{"\n"}{end}'`"
-- task: oc-cmd@2
-  displayName: 'Run unit tests'
-  inputs:
-    connectionType: 'OpenShift Connection Service'
-    openshiftService: 'Pytest-Dev'
-    cmd: 'exec $(POD_NAME) -- pytest --junitxml=junit.xml'
-    uselocalOc: true
-- task: oc-cmd@2
-  displayName: 'Transfer unit test results'
-  inputs:
-    connectionType: 'OpenShift Connection Service'
-    openshiftService: 'Pytest-Dev'
-    cmd: 'rsync $(POD_NAME):/opt/app-root/src/junit.xml $(System.DefaultWorkingDirectory)'
-    uselocalOc: true
-- task: PublishTestResults@2
-  displayName: 'Publish unit test results'
-  inputs:
-    testResultsFormat: 'JUnit'
-    testResultsFiles: '**/junit.xml'
-    failTaskOnFailedTests: true
-    testRunTitle: 'Published results'
