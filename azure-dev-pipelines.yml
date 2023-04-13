@@ -24,7 +24,6 @@ steps:
     connectionType: 'OpenShift Connection Service'
     openshiftService: 'Openshift Connection'
     cmd: 'start-build pytest-calculator --wait --follow'
-    uselocalOc: true
   displayName: 'Start the Build'
 - task: oc-cmd@3
   inputs:
